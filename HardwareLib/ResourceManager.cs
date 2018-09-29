@@ -24,9 +24,10 @@ namespace HardwareLib
         private int coreCount;
         private long totalMemory;
 
-        public ResourceManager() : this(NetworkDevices.GetNetDevices().Length<=0?null:NetworkDevices.GetNetDevices()[0])
+        public ResourceManager() : this(NetworkDevices.GetNetDevices().Length <= 0
+            ? null
+            : NetworkDevices.GetNetDevices()[0])
         {
-            
         }
 
         public ResourceManager(string networkDeviceName)
@@ -98,7 +99,7 @@ namespace HardwareLib
 
             if (networkDeviceName != null)
             {
-                SetNetDevice(networkDeviceName); 
+                SetNetDevice(networkDeviceName);
             }
         }
 
@@ -219,7 +220,7 @@ namespace HardwareLib
         {
             return 0;
         }
-        
+
         public float GetNetworkBytesSent()
         {
             return networkSent.NextValue();
@@ -229,9 +230,14 @@ namespace HardwareLib
         {
             return networkReceived.NextValue();
         }
-        
+
         public async Task<object> GetResourceData(object obj)
         {
+            if (obj != null && obj is string)
+            {
+                SetNetDevice((string) obj);
+            }
+
             return new ResourceData
             {
                 CpuTotalUsage = GetTotalCpuUsage(),
@@ -248,11 +254,16 @@ namespace HardwareLib
             };
         }
 
+        public async Task<object> Test(object obj)
+        {
+            return obj;
+        }
+
         public async Task<object> GetCoreCount(object obj)
         {
             return coreCount;
         }
-        
+
         public async Task<object> SetNetworkDevice(object obj)
         {
             SetNetDevice((string) obj);

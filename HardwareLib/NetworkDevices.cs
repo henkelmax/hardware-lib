@@ -5,7 +5,12 @@ namespace HardwareLib
 {
     public class NetworkDevices
     {
-        public static async Task<object> GetNetworkDevices(object obj)
+        public NetworkDevices()
+        {
+            
+        }
+        
+        public async Task<object> GetNetworkDevices(object obj)
         {
             return GetNetDevices();
         }
