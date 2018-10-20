@@ -23,6 +23,7 @@ namespace HardwareLib
         private ISensor cpuTemp;
         private int coreCount;
         private long totalMemory;
+        private IntPtr nvmlGPU;
 
         public ResourceManager() : this(NetworkDevices.GetNetDevices().Length <= 0
             ? null
@@ -101,6 +102,20 @@ namespace HardwareLib
             {
                 SetNetDevice(networkDeviceName);
             }
+            
+            GPU.nvmlInit_v2();
+            
+            GPU.nvmlDeviceGetCount(out var count);
+
+            if (count > 0)
+            {
+                GPU.nvmlDeviceGetHandleByIndex(0, out nvmlGPU);
+            }
+            else
+            {
+                GPU.nvmlShutdown();
+            }
+            
         }
 
         public void Close()
@@ -114,6 +129,8 @@ namespace HardwareLib
 
             memoryPercentage.Close();
             memoryAvailable.Close();
+            
+            GPU.nvmlShutdown();
         }
 
         public float GetTotalCpuUsage()
@@ -184,6 +201,24 @@ namespace HardwareLib
             return 0;
         }
 
+        public int GetGpuFanSpeedPercentage()
+        {
+            GPU.nvmlDeviceGetFanSpeed(nvmlGPU, out var speed);
+            return Convert.ToInt32(speed);
+        }
+        
+        public long GetGpuTotalMemory()
+        {
+            GPU.nvmlDeviceGetMemoryInfo(nvmlGPU, out var info);
+            return Convert.ToInt64(info.total);
+        }
+        
+        public long GetGpuUsedMemory()
+        {
+            GPU.nvmlDeviceGetMemoryInfo(nvmlGPU, out var info);
+            return Convert.ToInt64(info.used);
+        }
+
         public float GetGpuTemperature()
         {
             if (gpu == null || gpuTemp == null)
@@ -249,6 +284,9 @@ namespace HardwareLib
                 GpuUsage = GetGpuUsage(),
                 GpuTemperature = GetGpuTemperature(),
                 GpuFanSpeed = GetGpuFanSpeed(),
+                GpuFanSpeedPercentage = GetGpuFanSpeedPercentage(),
+                GpuTotalMemory = GetGpuTotalMemory(),
+                GpuUsedMemory = GetGpuUsedMemory(),
                 NetworkSent = GetNetworkBytesSent(),
                 NetworkReceived = GetNetworkBytesReceived()
             };
